@@ -1,8 +1,11 @@
 # app.py
+
 from flask import Flask, render_template, request, send_from_directory
 from keras.preprocessing.image import load_img, img_to_array
 from keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.applications import DenseNet201
+from tensorflow.keras.models import Sequential, Model
 import pickle
 import os
 import numpy as np
@@ -13,6 +16,9 @@ app = Flask(__name__)
 model_path = os.environ.get("MODEL_PATH", "models/model.h5")
 tokenizer_path = os.environ.get("TOKENIZER_PATH", "models/tokenizer.pkl")
 features_path = os.environ.get("FEATURES_PATH", "models/features.pkl")
+image_path = ""
+
+
 max_length = 34 
 
 # Load the model and tokenizer
@@ -35,11 +41,11 @@ def index():
         uploaded_file.save(image_path)
 
         # Perform prediction
-        img = load_img(image_path, target_size=(224, 224))
-        img = img_to_array(img)
-        img = img / 255.
+        # img = load_img(image_path, target_size=(224, 224))
+        # img = img_to_array(img)
+        # img = img / 255.
 
-        caption = predict_caption(caption_model, image_filename, tokenizer, max_length, features)
+        caption = predict_caption(caption_model, image_path, tokenizer, max_length, features)
 
         start_token = 'startseq'
         end_token = 'endseq'
@@ -67,7 +73,12 @@ def idx_to_word(integer, tokenizer):
     return None
 
 def predict_caption(model, image, tokenizer, max_length, features):
-    feature = features[image]
+    image = load_img(image,target_size=(224,224))
+    image = img_to_array(image)
+    image = image/255.
+    image = np.expand_dims(image,axis=0)
+    feature = fe.predict(image, verbose=0)
+    # feature = features[image]
     in_text = "startseq"
     for _ in range(max_length):
         sequence = tokenizer.texts_to_sequences([in_text])[0]
@@ -89,4 +100,7 @@ def predict_caption(model, image, tokenizer, max_length, features):
     return in_text
 
 if __name__ == '__main__':
+    # for prediction
+    model = DenseNet201()
+    fe = Model(inputs=model.input, outputs=model.layers[-2].output)
     app.run(debug=True)
