@@ -1,6 +1,6 @@
 Flask==2.0.1
 tensorflow==2.14.0
-keras==2.14.0
+keras
 Pillow==8.4.0
 Werkzeug==2.2.2
 gunicorn
